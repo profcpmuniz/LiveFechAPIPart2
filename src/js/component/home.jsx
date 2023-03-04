@@ -6,7 +6,9 @@ import rigoImage from "../../img/rigo-baby.jpg";
 //create your first component
 const Home = () => {
 	const [myText, setMyText] = useState('')
+	const [error, setError] = useState('')
 	const [isLoading, setIsLoading] = useState(false)
+	const [fakeReport, setFakeReport] = useState([])
 	
 	function CallReportGeneratePromise(){
 		return new Promise((resolve, reject)=>{
@@ -35,18 +37,40 @@ const Home = () => {
 	const handleButtonWithPromise = () => {
 		setIsLoading(true)
 		CallReportGeneratePromise().then(result => {
-			setMyText(result.message)
+			setError(result.message)
+			setFakeReport(result.data)
 		}).catch(error => {
-			setMyText(error.message)
+			setError(error.message)
 		}).finally(()=> setIsLoading(false))
+	}
+
+	const handleButtonWithPromiseAsync = async () => {
+		setIsLoading(true)
+		try {
+			let result = await CallReportGeneratePromise()
+			setError(result.message)
+			setFakeReport(result.data)
+		} catch (error) {
+			setError(error.message)
+		}
+		finally {
+			setIsLoading(false)
+		}
+
+		
+		
 	}
 
 
 	return (
 		<div className="text-center">
+			{error ?? (<div className="alert alert-danger" role="alert">
+  				{error}
+			</div>)}
+
 			<h1 className="text-center mt-5">{myText}</h1>
 			<input type="text" onChange={e => setMyText(e.target.value)}></input>
-			<button onClick={handleButtonWithPromise} class="btn btn-primary" type="button" disabled={isLoading}>
+			<button onClick={handleButtonWithPromiseAsync} class="btn btn-primary" type="button" disabled={isLoading}>
 				{isLoading ? (
 					<>
 						<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -55,6 +79,8 @@ const Home = () => {
 				) : (	<span>Generate Report</span>)}
   
 </button>
+
+				{fakeReport.map((item,index) => (<h1 key={index}>item</h1>))}
 			
 			<p>
 				<img src={rigoImage} />
